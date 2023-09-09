@@ -20,6 +20,8 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
+define( 'LARAVEL_URL', 'http://127.0.0.1:8000' );
+
 /**
  * The code that runs during plugin activation.
  */
@@ -38,18 +40,37 @@ function deactivate_test() {
     TestDeactivator::deactivate();
 }
 
+
+
 // Autoloads files load
 $classes = glob(plugin_dir_path( __FILE__ ).'autoload/*.php');
 if ($classes) {
     foreach ($classes as $class) {
-        require_once $class;
+        require_once wp_normalize_path($class);
     }
 }
 
 // Controller files load
 $controllers = glob(plugin_dir_path( __FILE__ ).'controller/*.php');
 if ($controllers) {
+
     foreach ($controllers as $controller) {
-        require_once $controller;
+        require_once wp_normalize_path($controller);
     }
 }
+
+function add_button_to_user_profile($user) {
+    $custom_meta_value = get_user_meta($user->ID, 'is_imported', true);
+
+    if ($custom_meta_value) {
+        echo '<h3>Laravel Dashboard</h3>';
+        echo '<a class="button-primary" href="'.LARAVEL_URL.'/customer-details/'.$user->user_email.'" target="_blank">Laravel Details</a>';
+    }
+}
+
+add_action('show_user_profile', 'add_button_to_user_profile');
+add_action('edit_user_profile', 'add_button_to_user_profile');
+
+
+
+
